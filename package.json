@@ -1,0 +1,23 @@
+{
+  "name": "react-chat",
+  "version": "1.0.0",
+  "description": "이 문서에서는 현재 프로젝트의 상태를 분석하고, 개발 규칙(User Rules)에 따른 웹 풀스택 프로젝트 구축 방향과 디렉토리 구조를 정리합니다.",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "node --watch backend/server.js",
+    "start": "node backend/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.3",
+    "socket.io": "^4.8.3"
+  }
+}
