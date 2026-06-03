@@ -1,0 +1,22 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  },
+  "cSpell.words": [
+    "partialize",
+    "nativewind",
+    "dicebear",
+    "avataaars",
+    "zustand",
+    "pressable",
+    "Pressable",
+    "worklet",
+    "worklets",
+    "tamagui",
+    "Tamagui",
+    "unistyles",
+    "reactnativeunistyles"
+  ]
+}
