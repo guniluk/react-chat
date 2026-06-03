@@ -1,6 +1,7 @@
 // Express
 import express from 'express';
-const app = express();
+import { app, server } from './socket/socket.js';
+
 app.use(express.json());
 
 // Environment variables
@@ -26,7 +27,8 @@ app.use('/api/users', userRoutes);
 
 // Database connection and server listening
 import connectToMongoDB from './db/connectToMongoDB.js';
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   connectToMongoDB();
   console.log(`Server running on port ${PORT}`);
 });
+
