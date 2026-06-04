@@ -6,6 +6,7 @@ import Home from "./pages/home/Home";
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { Toaster } from "react-hot-toast";
+import { FiSun, FiMoon } from "react-icons/fi";
 
 function App() {
   const { authUser, connectSocket, disconnectSocket } = useAuthStore();
@@ -24,7 +25,7 @@ function App() {
   }, [authUser, connectSocket, disconnectSocket]);
 
   return (
-    <div className="p-4 flex items-center justify-center min-h-screen w-full relative transition-colors duration-300">
+    <div className="relative flex items-center justify-center w-full min-h-screen p-4 transition-colors duration-300">
       <Toaster position="top-right" reverseOrder={false} />
       {/* Theme Toggle Button */}
       <button
@@ -33,35 +34,9 @@ function App() {
         aria-label="Toggle Theme"
       >
         {theme === "light" ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 3v2.25m0 13.5V21M4.22 4.22l1.59 1.59m12.38 12.38l1.59 1.59M3 12h2.25m13.5 0H21m-16.78 6.78l1.59-1.59M18.36 5.64l1.59-1.59M12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z"
-            />
-          </svg>
+          <FiSun className="w-5 h-5" />
         ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"
-            />
-          </svg>
+          <FiMoon className="w-5 h-5" />
         )}
       </button>
 

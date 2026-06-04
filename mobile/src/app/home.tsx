@@ -15,6 +15,7 @@ import { useColorScheme } from "nativewind";
 import { useAuthStore } from "../store/useAuthStore";
 import { useConversationStore, UserType } from "../store/useConversationStore";
 import { BASE_URL } from "../config";
+import { Feather } from "@expo/vector-icons";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -121,17 +122,20 @@ export default function Home() {
             className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50"
             aria-label="Toggle Theme"
           >
-            <Text className="text-lg">
-              {colorScheme === "light" ? "🌙" : "☀️"}
-            </Text>
+            {colorScheme === "light" ? (
+              <Feather name="moon" size={16} color="#475569" />
+            ) : (
+              <Feather name="sun" size={16} color="#fbbf24" />
+            )}
           </TouchableOpacity>
 
           {/* 로그아웃 버튼 */}
           <TouchableOpacity
             onPress={handleLogout}
             className="p-2.5 rounded-xl bg-red-500/10 active:bg-red-500/20 border border-red-500/20"
+            aria-label="Logout"
           >
-            <Text className="text-red-500 dark:text-red-400 font-bold text-xs">Logout</Text>
+            <Feather name="log-out" size={16} color="#ef4444" />
           </TouchableOpacity>
         </View>
       </View>

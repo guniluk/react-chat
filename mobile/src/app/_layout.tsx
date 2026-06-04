@@ -5,6 +5,7 @@ import { View, Text, Animated, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { useAuthStore } from "../store/useAuthStore";
 import { useConversationStore, MessageType, UserType } from "../store/useConversationStore";
+import { Feather } from "@expo/vector-icons";
 
 export default function RootLayout() {
   const { authUser, connectSocket, disconnectSocket, socket } = useAuthStore();
@@ -123,8 +124,9 @@ export default function RootLayout() {
             <TouchableOpacity 
               onPress={handleDismiss} 
               className="w-8 h-8 items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-full"
+              aria-label="Dismiss notification"
             >
-              <Text className="text-slate-500 dark:text-slate-300 font-bold text-xs">✕</Text>
+              <Feather name="x" size={14} color="#64748b" />
             </TouchableOpacity>
           </View>
         )}

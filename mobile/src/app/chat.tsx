@@ -15,6 +15,7 @@ import { Image } from "expo-image";
 import { useAuthStore } from "../store/useAuthStore";
 import { useConversationStore, MessageType } from "../store/useConversationStore";
 import { BASE_URL } from "../config";
+import { Feather } from "@expo/vector-icons";
 
 export default function Chat() {
   const router = useRouter();
@@ -129,8 +130,8 @@ export default function Chat() {
       >
         {/* 상단 헤더 */}
         <View className="px-4 py-3 flex-row items-center border-b border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-900/50">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3 p-1">
-            <Text className="text-blue-500 font-bold text-base">← Back</Text>
+          <TouchableOpacity onPress={() => router.back()} className="mr-3 p-1.5 rounded-full active:bg-slate-100 dark:active:bg-slate-800" aria-label="Go back">
+            <Feather name="arrow-left" size={20} color="#3b82f6" />
           </TouchableOpacity>
 
           <View className="relative mr-3">
@@ -253,8 +254,9 @@ export default function Chat() {
           <TouchableOpacity
             onPress={handleSendMessage}
             className="ml-3 p-3 rounded-full bg-blue-600 active:bg-blue-500"
+            aria-label="Send message"
           >
-            <Text className="text-white font-bold text-sm">Send</Text>
+            <Feather name="send" size={16} color="#ffffff" />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

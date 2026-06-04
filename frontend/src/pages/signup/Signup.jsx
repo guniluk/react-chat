@@ -1,57 +1,22 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../store/useAuthStore";
-import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
+import { useSignup } from "../../hooks/useSignup";
 
 export const Signup = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    fullName: "",
-    password: "",
-    confirmPassword: "",
-    gender: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const { setAuthUser } = useAuthStore();
-  const navigate = useNavigate();
-
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Signup failed");
-      }
-      setAuthUser(data);
-      setLoading(false);
-      toast.success("Signup successful");
-      navigate("/home");
-    } catch (err) {
-      toast.error(err.message);
-      setLoading(false);
-    }
-  };
+  const { formData, setFormData, loading, error, handleSignup } = useSignup();
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 border border-slate-200 dark:border-slate-700/50 rounded-lg bg-white dark:bg-slate-900/80 text-black dark:text-white w-md mx-auto shadow-xl dark:shadow-2xl transition-colors duration-300">
-      <h1 className="text-4xl font-bold text-black dark:text-white mb-4">
-        Sign Up <span className="text-blue-600 dark:text-blue-400">Chat App</span>
+    <div className="flex flex-col items-center justify-center p-6 mx-auto text-black transition-colors duration-300 bg-white border rounded-lg shadow-xl border-slate-200 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-white w-md dark:shadow-2xl">
+      <h1 className="mb-4 text-4xl font-bold text-black dark:text-white">
+        Sign Up{" "}
+        <span className="text-blue-600 dark:text-blue-400">Chat App</span>
       </h1>
-      {error && <div className="text-red-500 dark:text-red-400 text-sm mb-4">{error}</div>}
+      {error && (
+        <div className="mb-4 text-sm text-red-500 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
-      <form onSubmit={handleSignup} className="w-full flex flex-col">
+      <form onSubmit={handleSignup} className="flex flex-col w-full">
         <input
           type="text"
           placeholder="Username"
@@ -59,7 +24,7 @@ export const Signup = () => {
           onChange={(e) =>
             setFormData({ ...formData, username: e.target.value })
           }
-          className="w-full px-4 py-2 mb-4 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white focus:outline-none focus:border-blue-500"
+          className="w-full px-4 py-2 mb-4 text-black bg-white border rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
         />
         <input
           type="text"
@@ -68,7 +33,7 @@ export const Signup = () => {
           onChange={(e) =>
             setFormData({ ...formData, fullName: e.target.value })
           }
-          className="w-full px-4 py-2 mb-4 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white focus:outline-none focus:border-blue-500"
+          className="w-full px-4 py-2 mb-4 text-black bg-white border rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
         />
         <input
           type="password"
@@ -77,18 +42,21 @@ export const Signup = () => {
           onChange={(e) =>
             setFormData({ ...formData, password: e.target.value })
           }
-          className="w-full px-4 py-2 mb-4 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white focus:outline-none focus:border-blue-500"
+          className="w-full px-4 py-2 mb-4 text-black bg-white border rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
         />
         <input
           type="password"
           placeholder="Confirm Password"
-          className="w-full px-4 py-2 mb-4 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-black dark:text-white focus:outline-none focus:border-blue-500"
+          className="w-full px-4 py-2 mb-4 text-black bg-white border rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
           value={formData.confirmPassword}
           onChange={(e) =>
             setFormData({ ...formData, confirmPassword: e.target.value })
           }
         />
-        <label htmlFor="gender" className="flex items-center gap-2 mb-4 justify-center text-slate-800 dark:text-slate-400 font-semibold text-sm">
+        <label
+          htmlFor="gender"
+          className="flex items-center justify-center gap-2 mb-4 text-sm font-semibold text-slate-800 dark:text-slate-400"
+        >
           <span className="mr-2">Gender</span>
           <input
             type="radio"
@@ -125,8 +93,13 @@ export const Signup = () => {
       </form>
 
       <div className="flex mt-4 text-sm">
-        <p className="text-slate-600 dark:text-slate-400 mr-2">Already have an account?</p>
-        <Link to="/" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline cursor-pointer">
+        <p className="mr-2 text-slate-600 dark:text-slate-400">
+          Already have an account?
+        </p>
+        <Link
+          to="/login"
+          className="font-semibold text-blue-600 cursor-pointer dark:text-blue-400 hover:underline"
+        >
           Login here
         </Link>
       </div>
