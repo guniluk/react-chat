@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -25,6 +26,11 @@ export default function Chat() {
   const [messageText, setMessageText] = useState("");
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList<MessageType>>(null);
+
+  const [shakingMessageId, setShakingMessageId] = useState<string | null>(null);
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const prevMessagesLength = useRef(0);
+  const isFirstLoad = useRef(true);
 
   // DiceBear SVG 주소를 PNG 주소로 우회 변환하여 React Native 렌더링 먹통 방지
   const getProfilePicUrl = (url: string) => {
@@ -110,6 +116,66 @@ export default function Chat() {
       }, 150);
     }
   }, [messages]);
+
+  // 새로운 메시지가 왔을 때 shake 애니메이션 실행 (2초 동안)
+  useEffect(() => {
+    if (loading) {
+      isFirstLoad.current = true;
+      return;
+    }
+
+    if (isFirstLoad.current) {
+      prevMessagesLength.current = messages.length;
+      isFirstLoad.current = false;
+      return;
+    }
+
+    if (messages.length > prevMessagesLength.current) {
+      const lastMessage = messages[messages.length - 1];
+      // 마지막 메시지가 상대방이 보낸 메시지(수신 메시지)일 때만 shake 적용
+      if (lastMessage && lastMessage.senderId !== authUser?._id) {
+        setShakingMessageId(lastMessage._id);
+
+        const shakeSequence = Animated.loop(
+          Animated.sequence([
+            Animated.timing(shakeAnim, {
+              toValue: -6,
+              duration: 50,
+              useNativeDriver: true,
+            }),
+            Animated.timing(shakeAnim, {
+              toValue: 6,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(shakeAnim, {
+              toValue: 0,
+              duration: 50,
+              useNativeDriver: true,
+            }),
+          ]),
+          { iterations: 10 }
+        );
+
+        shakeSequence.start();
+
+        const timer = setTimeout(() => {
+          shakeSequence.stop();
+          shakeAnim.setValue(0);
+          setShakingMessageId(null);
+        }, 2000);
+
+        prevMessagesLength.current = messages.length;
+        return () => {
+          shakeSequence.stop();
+          clearTimeout(timer);
+          shakeAnim.setValue(0);
+        };
+      }
+    }
+
+    prevMessagesLength.current = messages.length;
+  }, [messages, loading, authUser?._id]);
 
   if (!selectedConversation) {
     return (
@@ -204,7 +270,12 @@ export default function Chat() {
                       />
                     )}
                     <View className="max-w-[70%]">
-                      <View
+                      <Animated.View
+                        style={
+                          item._id === shakingMessageId
+                            ? { transform: [{ translateX: shakeAnim }] }
+                            : {}
+                        }
                         className={`px-4 py-2.5 rounded-2xl ${
                           isMyMessage
                             ? "bg-blue-600 rounded-br-none"
@@ -214,7 +285,7 @@ export default function Chat() {
                         <Text className={`text-sm leading-5 ${isMyMessage ? "text-white" : "text-slate-900 dark:text-white"}`}>
                           {item.message}
                         </Text>
-                      </View>
+                      </Animated.View>
                       <Text
                         className={`text-[9px] text-slate-500 mt-1 ${
                           isMyMessage ? "text-right" : "text-left"

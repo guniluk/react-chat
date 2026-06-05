@@ -1,18 +1,20 @@
-import { create } from "zustand";
-import { io } from "socket.io-client";
+import { create } from 'zustand';
+import { io } from 'socket.io-client';
 
 const SOCKET_URL =
-  import.meta.env.MODE === "development" ? "http://localhost:3000" : "/";
+  import.meta.env.MODE === 'development'
+    ? 'http://localhost:3000'
+    : 'input your domain'; // TODO: replace with your domain
 
 export const useAuthStore = create((set, get) => ({
-  authUser: JSON.parse(localStorage.getItem("chat-user")) || null,
+  authUser: JSON.parse(localStorage.getItem('chat-user')) || null,
   onlineUsers: [], // list of online user IDs
   socket: null,
   setAuthUser: (user) => {
     if (user) {
-      localStorage.setItem("chat-user", JSON.stringify(user));
+      localStorage.setItem('chat-user', JSON.stringify(user));
     } else {
-      localStorage.removeItem("chat-user");
+      localStorage.removeItem('chat-user');
     }
     set({ authUser: user });
   },
@@ -28,7 +30,7 @@ export const useAuthStore = create((set, get) => ({
     });
     set({ socket: newSocket });
 
-    newSocket.on("getOnlineUsers", (users) => {
+    newSocket.on('getOnlineUsers', (users) => {
       set({ onlineUsers: users });
     });
   },

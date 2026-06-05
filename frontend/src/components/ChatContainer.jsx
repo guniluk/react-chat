@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react";
 import { FiMessageSquare, FiSend, FiArrowLeft } from "react-icons/fi";
 
 const ChatContainer = ({
@@ -12,6 +13,36 @@ const ChatContainer = ({
   chatEndRef,
   setSelectedConversation,
 }) => {
+  const [shakingMessageId, setShakingMessageId] = useState(null);
+  const prevLength = useRef(0);
+  const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    if (loadingMessages) {
+      isFirstLoad.current = true;
+      return;
+    }
+
+    if (isFirstLoad.current) {
+      prevLength.current = messages.length;
+      isFirstLoad.current = false;
+      return;
+    }
+
+    if (messages.length > prevLength.current) {
+      const lastMessage = messages[messages.length - 1];
+      // 마지막 메시지가 상대방이 보낸 메시지(수신 메시지)일 때만 shake 적용
+      if (lastMessage && lastMessage.senderId !== authUser?._id) {
+        setShakingMessageId(lastMessage._id);
+        const timer = setTimeout(() => setShakingMessageId(null), 2000);
+        prevLength.current = messages.length;
+        return () => clearTimeout(timer);
+      }
+    }
+
+    prevLength.current = messages.length;
+  }, [messages, loadingMessages, authUser?._id]);
+
   return (
     <div className="flex flex-col flex-1 transition-colors duration-300 bg-white dark:bg-slate-950/30">
       {/* 우상단 헤더 */}
@@ -101,7 +132,7 @@ const ChatContainer = ({
                       isMyMessage
                         ? "bg-blue-600 text-white rounded-br-none"
                         : "bg-slate-200 dark:bg-slate-700 text-black dark:text-slate-100 rounded-bl-none"
-                    }`}
+                    } ${msg._id === shakingMessageId ? "animate-shake" : ""}`}
                   >
                     {msg.message}
                   </div>
