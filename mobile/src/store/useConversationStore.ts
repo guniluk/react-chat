@@ -6,6 +6,8 @@ export interface UserType {
   username: string;
   profilePic: string;
   gender: string;
+  unreadCount?: number;
+  lastMessageStatus?: "read" | "unread" | "none";
 }
 
 export interface MessageType {
@@ -13,6 +15,7 @@ export interface MessageType {
   senderId: string;
   receiverId: string;
   message: string;
+  messageFile?: string;
   createdAt: string;
   updatedAt: string;
 }

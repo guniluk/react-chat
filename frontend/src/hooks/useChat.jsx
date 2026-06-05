@@ -74,6 +74,7 @@ const playNotificationSound = () => {
 export const useChat = () => {
   const [users, setUsers] = useState([]);
   const [messageText, setMessageText] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
@@ -120,6 +121,15 @@ export const useChat = () => {
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         setMessages(data);
+
+        // 대화방을 열었으므로 해당 유저의 unreadCount를 0으로 리셋
+        setUsers(prevUsers =>
+          prevUsers.map(u =>
+            u._id === selectedConversation._id
+              ? { ...u, unreadCount: 0 }
+              : u
+          )
+        );
       } catch (err) {
         console.error("Failed to load messages:", err.message);
       } finally {
@@ -132,7 +142,7 @@ export const useChat = () => {
   // 메시지 전송
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!messageText.trim()) return;
+    if (!messageText.trim() && !selectedImage) return;
 
     try {
       const res = await fetch(
@@ -140,13 +150,32 @@ export const useChat = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: messageText }),
+          body: JSON.stringify({ 
+            message: messageText,
+            messageFile: selectedImage
+          }),
         },
       );
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Server status ${res.status}: ${errText.slice(0, 50)}`);
+      }
+
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setMessages([...messages, data]);
       setMessageText("");
+      setSelectedImage(null);
+
+      // 내가 보낸 메시지 상태를 우선 'unread'로 표시
+      setUsers(prevUsers =>
+        prevUsers.map(u =>
+          u._id === selectedConversation._id
+            ? { ...u, lastMessageStatus: 'unread' }
+            : u
+        )
+      );
     } catch (err) {
       console.error("Failed to send message:", err.message);
     }
@@ -157,12 +186,24 @@ export const useChat = () => {
     if (!socket) return;
 
     const handleNewMessage = (newMessage) => {
-      // 1. 현재 선택한 유저가 보낸 메시지인 경우 -> 대화창에 즉시 추가 및 사운드 재생
+      // 1. 현재 선택한 유저가 보낸 메시지인 경우 -> 대화창에 즉시 추가, 사운드 재생, 읽음 처리
       if (selectedConversation?._id === newMessage.senderId) {
         setMessages([...messages, newMessage]);
         playNotificationSound();
+
+        // 즉시 서버에 읽음 처리 API 전송
+        fetch(`/api/messages/read/${selectedConversation._id}`, { method: "PUT" })
+          .catch(err => console.error("Failed to mark read:", err));
       } else {
-        // 2. 다른 유저가 보낸 메시지인 경우 -> 알림(Toast) 표시 및 클릭 시 대화창 이동
+        // 2. 다른 유저가 보낸 메시지인 경우 -> 유저 목록의 unreadCount 1 증가
+        setUsers(prevUsers =>
+          prevUsers.map(u =>
+            u._id === newMessage.senderId
+              ? { ...u, unreadCount: (u.unreadCount || 0) + 1 }
+              : u
+          )
+        );
+
         const sender = users.find((u) => u._id === newMessage.senderId);
         const senderName = sender ? sender.fullName : "새로운 메시지";
         const senderPic =
@@ -200,7 +241,7 @@ export const useChat = () => {
                       {senderName}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate font-medium">
-                      {newMessage.message}
+                      {newMessage.message || "📷 사진"}
                     </p>
                   </div>
                 </div>
@@ -223,10 +264,35 @@ export const useChat = () => {
       }
     };
 
+    // 상대방이 메시지를 읽었을 때의 실시간 처리
+    const handleMessagesRead = ({ readerId }) => {
+      // 유저 목록의 lastMessageStatus를 'read'로 업데이트
+      setUsers(prevUsers =>
+        prevUsers.map(u =>
+          u._id === readerId
+            ? { ...u, lastMessageStatus: 'read' }
+            : u
+        )
+      );
+
+      // 현재 대화방이 해당 유저와의 방이라면, 화면상의 내 메시지들도 읽음으로 업데이트
+      if (selectedConversation?._id === readerId) {
+        setMessages(
+          messages.map(msg =>
+            msg.receiverId === readerId
+              ? { ...msg, isRead: true }
+              : msg
+          )
+        );
+      }
+    };
+
     socket.on("newMessage", handleNewMessage);
+    socket.on("messagesRead", handleMessagesRead);
 
     return () => {
       socket.off("newMessage", handleNewMessage);
+      socket.off("messagesRead", handleMessagesRead);
     };
   }, [
     socket,
@@ -267,5 +333,7 @@ export const useChat = () => {
     onlineUsers,
     selectedConversation,
     setSelectedConversation,
+    selectedImage,
+    setSelectedImage,
   };
 };

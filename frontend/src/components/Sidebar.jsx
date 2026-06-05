@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiSearch, FiLogOut } from "react-icons/fi";
+import { FiSearch, FiLogOut, FiCheck, FiHelpCircle } from "react-icons/fi";
 
 const Sidebar = ({
   users,
@@ -83,13 +83,36 @@ const Sidebar = ({
                     }`}
                   />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-black truncate dark:text-slate-200">
-                    {user.fullName}
-                  </p>
-                  <p className="text-xs truncate text-slate-700 dark:text-slate-400">
-                    @{user.username}
-                  </p>
+                <div className="flex-1 min-w-0 flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-semibold text-black truncate dark:text-slate-200">
+                        {user.fullName}
+                      </p>
+                      
+                      {/* 내가 보낸 마지막 메시지 읽음 여부 트래킹 */}
+                      {user.lastMessageStatus === "read" && (
+                        <span className="text-blue-500" title="Read">
+                          <FiCheck className="w-3.5 h-3.5" />
+                        </span>
+                      )}
+                      {user.lastMessageStatus === "unread" && (
+                        <span className="text-slate-400" title="Sent (Unread)">
+                          <FiHelpCircle className="w-3.5 h-3.5" />
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs truncate text-slate-700 dark:text-slate-400">
+                      @{user.username}
+                    </p>
+                  </div>
+                  
+                  {/* 안 읽은 메시지 개수 배지 */}
+                  {user.unreadCount > 0 && (
+                    <span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-bold text-white bg-red-500 rounded-full animate-pulse shadow-sm shrink-0">
+                      {user.unreadCount}
+                    </span>
+                  )}
                 </div>
               </div>
             );

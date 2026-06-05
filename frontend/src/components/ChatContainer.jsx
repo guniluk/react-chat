@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { FiMessageSquare, FiSend, FiArrowLeft } from "react-icons/fi";
+import { FiMessageSquare, FiSend, FiArrowLeft, FiImage, FiX } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 const ChatContainer = ({
   selectedConversation,
@@ -12,10 +13,35 @@ const ChatContainer = ({
   handleSendMessage,
   chatEndRef,
   setSelectedConversation,
+  selectedImage,
+  setSelectedImage,
 }) => {
   const [shakingMessageId, setShakingMessageId] = useState(null);
+  const fileInputRef = useRef(null);
   const prevLength = useRef(0);
   const isFirstLoad = useRef(true);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      toast.error("이미지 크기는 1MB를 초과할 수 없습니다.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   useEffect(() => {
     if (loadingMessages) {
@@ -134,7 +160,14 @@ const ChatContainer = ({
                         : "bg-slate-200 dark:bg-slate-700 text-black dark:text-slate-100 rounded-bl-none"
                     } ${msg._id === shakingMessageId ? "animate-shake" : ""}`}
                   >
-                    {msg.message}
+                    {msg.messageFile && (
+                      <img
+                        src={msg.messageFile}
+                        alt="Attachment"
+                        className="max-w-[250px] md:max-w-[320px] rounded-lg mb-2 shadow-sm border border-slate-200 dark:border-slate-700/50"
+                      />
+                    )}
+                    {msg.message && <p>{msg.message}</p>}
                   </div>
                   <span
                     className={`text-[10px] text-slate-700 dark:text-slate-500 mt-1 ${
@@ -153,7 +186,42 @@ const ChatContainer = ({
 
       {/* 하단 입력 영역 */}
       <div className="p-3 md:p-4 transition-colors duration-300 border-t border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/30">
-        <form onSubmit={handleSendMessage} className="flex gap-2">
+        {selectedImage && (
+          <div className="flex items-center gap-2 mb-3 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-xl w-fit relative group">
+            <img
+              src={selectedImage}
+              alt="Preview"
+              className="w-16 h-16 object-cover rounded-lg border border-slate-200 dark:border-slate-700"
+            />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full p-0.5 shadow-md transition-colors"
+            >
+              <FiX className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+          />
+          
+          <button
+            type="button"
+            className={`flex items-center justify-center p-3 text-slate-500 dark:text-slate-400 transition-colors bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700/50 cursor-pointer rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 ${
+              selectedImage ? "text-blue-500 border-blue-500" : ""
+            }`}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <FiImage className="w-5 h-5" />
+          </button>
+
           <input
             type="text"
             placeholder="Type a message..."

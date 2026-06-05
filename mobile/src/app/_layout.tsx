@@ -9,7 +9,7 @@ import { Feather } from "@expo/vector-icons";
 
 export default function RootLayout() {
   const { authUser, connectSocket, disconnectSocket, socket } = useAuthStore();
-  const { users, selectedConversation, setSelectedConversation } = useConversationStore();
+  const { setUsers, selectedConversation, setSelectedConversation } = useConversationStore();
   const router = useRouter();
 
   const [notification, setNotification] = useState<{ message: string; sender: UserType } | null>(null);
@@ -30,10 +30,20 @@ export default function RootLayout() {
       // Ignore if the message is from the currently selected conversation (chat screen handles it)
       if (selectedConversation?._id === newMessage.senderId) return;
 
-      // Find sender info
-      const sender = users.find((u) => u._id === newMessage.senderId);
+      // Increment unreadCount using latest state from Zustand
+      const currentUsers = useConversationStore.getState().users;
+      setUsers(
+        currentUsers.map((u) =>
+          u._id === newMessage.senderId
+            ? { ...u, unreadCount: (u.unreadCount || 0) + 1 }
+            : u
+        )
+      );
+
+      // Find sender info from latest users state
+      const sender = useConversationStore.getState().users.find((u) => u._id === newMessage.senderId);
       if (sender) {
-        setNotification({ message: newMessage.message, sender });
+        setNotification({ message: newMessage.message || "📷 사진", sender });
         
         // Show toast
         Animated.timing(slideAnim, {
@@ -44,11 +54,24 @@ export default function RootLayout() {
       }
     };
 
+    const handleMessagesRead = ({ readerId }: { readerId: string }) => {
+      const currentUsers = useConversationStore.getState().users;
+      setUsers(
+        currentUsers.map((u) =>
+          u._id === readerId
+            ? { ...u, lastMessageStatus: "read" }
+            : u
+        )
+      );
+    };
+
     socket.on("newMessage", handleNewMessage);
+    socket.on("messagesRead", handleMessagesRead);
     return () => {
       socket.off("newMessage", handleNewMessage);
+      socket.off("messagesRead", handleMessagesRead);
     };
-  }, [socket, selectedConversation, users, slideAnim]);
+  }, [socket, selectedConversation, slideAnim, setUsers]);
 
   const handleNotificationPress = () => {
     if (notification?.sender) {
@@ -58,6 +81,11 @@ export default function RootLayout() {
         duration: 150,
         useNativeDriver: true,
       }).start(() => setNotification(null));
+
+      // 만약 이미 선택된 대화방 상대와 알림 보낸 사람이 같다면, 중복 이동 방지
+      if (selectedConversation?._id === notification.sender._id) {
+        return;
+      }
 
       setSelectedConversation(notification.sender);
       router.push("/chat");

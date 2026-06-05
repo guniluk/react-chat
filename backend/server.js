@@ -2,7 +2,8 @@
 import express from 'express';
 import { app, server } from './socket/socket.js';
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 // Environment variables
 import dotenv from 'dotenv';

@@ -19,6 +19,8 @@ const Home = () => {
     onlineUsers,
     selectedConversation,
     setSelectedConversation,
+    selectedImage,
+    setSelectedImage,
   } = useChat();
 
   return (
@@ -45,6 +47,8 @@ const Home = () => {
           handleSendMessage={handleSendMessage}
           chatEndRef={chatEndRef}
           setSelectedConversation={setSelectedConversation}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
         />
       ) : (
         <NoChatSelected authUser={authUser} />

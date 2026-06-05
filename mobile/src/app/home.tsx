@@ -35,8 +35,9 @@ export default function Home() {
     return url;
   };
 
-  // 사용자 목록 조회
+  // 사용자 목록 조회 및 선택 상태 초기화
   useEffect(() => {
+    setSelectedConversation(null); // 홈 화면에 진입했으므로 선택된 대화방 초기화
     if (!token) return;
 
     const getUsers = async () => {
@@ -59,7 +60,7 @@ export default function Home() {
     };
 
     getUsers();
-  }, [token]);
+  }, [token, setSelectedConversation]);
 
   const handleLogout = async () => {
     try {
@@ -163,6 +164,7 @@ export default function Home() {
       ) : (
         <FlatList
           data={filteredUsers}
+          extraData={users}
           keyExtractor={(item) => item._id}
           contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 8 }}
           renderItem={({ item }) => {
@@ -172,7 +174,7 @@ export default function Home() {
                 onPress={() => selectUser(item)}
                 className="flex-row items-center justify-between py-3.5 border-b border-slate-100 dark:border-slate-900/50"
               >
-                <View className="flex-row items-center gap-3">
+                <View className="flex-row items-center gap-3 flex-1 pr-4">
                   <View className="relative">
                     <Image
                       source={getProfilePicUrl(
@@ -187,20 +189,42 @@ export default function Home() {
                       <View className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-white dark:border-slate-950 animate-pulse" />
                     )}
                   </View>
-                  <View>
-                    <Text className="text-slate-900 dark:text-white font-semibold text-base">
-                      {item.fullName}
-                    </Text>
-                    <Text className="text-slate-500 dark:text-slate-400 text-xs">
+                  <View className="flex-1">
+                    <View className="flex-row items-center">
+                      <Text className="text-slate-900 dark:text-white font-semibold text-base mr-1">
+                        {item.fullName}
+                      </Text>
+
+                      {/* 내가 보낸 마지막 메시지 읽음 여부 트래킹 */}
+                      {item.lastMessageStatus === "read" && (
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                          <Feather name="check" size={14} color="#3b82f6" />
+                        </View>
+                      )}
+                      {item.lastMessageStatus === "unread" && (
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                          <Feather name="help-circle" size={14} color="#94a3b8" />
+                        </View>
+                      )}
+                    </View>
+                    <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">
                       @{item.username}
                     </Text>
                   </View>
                 </View>
 
-                {/* 상태 텍스트 */}
-                <Text className={`text-xs font-semibold ${isOnline ? "text-green-500" : "text-slate-400"}`}>
-                  {isOnline ? "Online" : "Offline"}
-                </Text>
+                {/* 우측 정렬: 안 읽은 개수 배지 + 온라인/오프라인 상태 */}
+                <View className="flex-row items-center">
+                  {item.unreadCount !== undefined && item.unreadCount > 0 ? (
+                    <View className="bg-red-500 rounded-full min-w-[20px] h-5 px-1.5 justify-center items-center mr-3 shadow-sm">
+                      <Text className="text-white text-[10px] font-bold leading-none">{item.unreadCount}</Text>
+                    </View>
+                  ) : null}
+
+                  <Text className={`text-xs font-semibold ${isOnline ? "text-green-500" : "text-slate-400"}`}>
+                    {isOnline ? "Online" : "Offline"}
+                  </Text>
+                </View>
               </TouchableOpacity>
             );
           }}
