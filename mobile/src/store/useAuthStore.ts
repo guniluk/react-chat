@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { io } from "socket.io-client";
-import { SOCKET_URL } from "../config";
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../config';
 
 export interface UserType {
   _id: string;
@@ -46,12 +46,12 @@ export const useAuthStore = create<AuthState>()(
           query: {
             userId: authUser._id,
           },
-          transports: ["websocket"],
+          transports: ['websocket'],
         });
 
         set({ socket: newSocket });
 
-        newSocket.on("getOnlineUsers", (users: string[]) => {
+        newSocket.on('getOnlineUsers', (users: string[]) => {
           set({ onlineUsers: users });
         });
       },
@@ -71,9 +71,9 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "chat-auth-storage",
+      name: 'chat-auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ authUser: state.authUser, token: state.token }),
-    }
-  )
+    },
+  ),
 );

@@ -63,7 +63,7 @@ export default function Login() {
             <Text className="text-4xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">
               Login <Text className="text-blue-500">Chat App</Text>
             </Text>
-            <Text className="text-slate-500 dark:text-slate-400 text-sm">
+            <Text className="text-slate-600 dark:text-slate-400 text-sm">
               Welcome back! Please enter your details.
             </Text>
           </View>

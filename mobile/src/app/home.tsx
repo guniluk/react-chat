@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,18 +7,18 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { useColorScheme } from "nativewind";
-import { useAuthStore } from "../store/useAuthStore";
-import { useConversationStore, UserType } from "../store/useConversationStore";
-import { BASE_URL } from "../config";
-import { Feather } from "@expo/vector-icons";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import { useColorScheme } from 'nativewind';
+import { useAuthStore } from '../store/useAuthStore';
+import { useConversationStore, UserType } from '../store/useConversationStore';
+import { BASE_URL } from '../config';
+import { Feather } from '@expo/vector-icons';
 
 export default function Home() {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -28,9 +28,9 @@ export default function Home() {
 
   // DiceBear SVG 주소를 PNG 주소로 우회 변환하여 React Native 렌더링 먹통 방지
   const getProfilePicUrl = (url: string) => {
-    if (!url) return "";
-    if (url.includes("dicebear.com") && url.includes("/svg")) {
-      return url.replace("/svg", "/png");
+    if (!url) return '';
+    if (url.includes('dicebear.com') && url.includes('/svg')) {
+      return url.replace('/svg', '/png');
     }
     return url;
   };
@@ -45,47 +45,47 @@ export default function Home() {
       try {
         const res = await fetch(`${BASE_URL}/api/users`, {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         setUsers(data);
       } catch (err: any) {
-        console.error("Failed to load users:", err.message);
-        Alert.alert("Error", "Failed to load users list");
+        console.error('Failed to load users:', err.message);
+        Alert.alert('Error', 'Failed to load users list');
       } finally {
         setLoading(false);
       }
     };
 
     getUsers();
-  }, [token, setSelectedConversation]);
+  }, [token, setSelectedConversation, setUsers]);
 
   const handleLogout = async () => {
     try {
       await fetch(`${BASE_URL}/api/auth/logout`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
     } catch (e) {
-      console.warn("Logout API call failed, signing out locally...", e);
+      console.warn('Logout API call failed, signing out locally...', e);
     } finally {
       logout();
-      router.replace("/login");
+      router.replace('/login');
     }
   };
 
   const filteredUsers = users.filter((user) =>
-    user.fullName.toLowerCase().includes(search.toLowerCase())
+    user.fullName.toLowerCase().includes(search.toLowerCase()),
   );
 
   const selectUser = (user: UserType) => {
     setSelectedConversation(user);
-    router.push("/chat");
+    router.push('/chat');
   };
 
   return (
@@ -97,7 +97,7 @@ export default function Home() {
             <Image
               source={getProfilePicUrl(
                 authUser?.profilePic ||
-                `https://api.dicebear.com/9.x/avataaars/svg?seed=${authUser?.username}`
+                  `https://api.dicebear.com/9.x/avataaars/svg?seed=${authUser?.username}`,
               )}
               style={{ width: 40, height: 40, borderRadius: 20 }}
               contentFit="cover"
@@ -123,7 +123,7 @@ export default function Home() {
             className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50"
             aria-label="Toggle Theme"
           >
-            {colorScheme === "light" ? (
+            {colorScheme === 'light' ? (
               <Feather name="moon" size={16} color="#475569" />
             ) : (
               <Feather name="sun" size={16} color="#fbbf24" />
@@ -159,7 +159,9 @@ export default function Home() {
         </View>
       ) : filteredUsers.length === 0 ? (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-slate-500 dark:text-slate-400 text-sm">No users found</Text>
+          <Text className="text-slate-500 dark:text-slate-400 text-sm">
+            No users found
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -179,7 +181,7 @@ export default function Home() {
                     <Image
                       source={getProfilePicUrl(
                         item.profilePic ||
-                        `https://api.dicebear.com/9.x/avataaars/svg?seed=${item.username}`
+                          `https://api.dicebear.com/9.x/avataaars/svg?seed=${item.username}`,
                       )}
                       style={{ width: 48, height: 48, borderRadius: 24 }}
                       contentFit="cover"
@@ -196,14 +198,22 @@ export default function Home() {
                       </Text>
 
                       {/* 내가 보낸 마지막 메시지 읽음 여부 트래킹 */}
-                      {item.lastMessageStatus === "read" && (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                      {item.lastMessageStatus === 'read' && (
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center' }}
+                        >
                           <Feather name="check" size={14} color="#3b82f6" />
                         </View>
                       )}
-                      {item.lastMessageStatus === "unread" && (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                          <Feather name="help-circle" size={14} color="#94a3b8" />
+                      {item.lastMessageStatus === 'unread' && (
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center' }}
+                        >
+                          <Feather
+                            name="help-circle"
+                            size={14}
+                            color="#94a3b8"
+                          />
                         </View>
                       )}
                     </View>
@@ -217,12 +227,16 @@ export default function Home() {
                 <View className="flex-row items-center">
                   {item.unreadCount !== undefined && item.unreadCount > 0 ? (
                     <View className="bg-red-500 rounded-full min-w-[20px] h-5 px-1.5 justify-center items-center mr-3 shadow-sm">
-                      <Text className="text-white text-[10px] font-bold leading-none">{item.unreadCount}</Text>
+                      <Text className="text-white text-[10px] font-bold leading-none">
+                        {item.unreadCount}
+                      </Text>
                     </View>
                   ) : null}
 
-                  <Text className={`text-xs font-semibold ${isOnline ? "text-green-500" : "text-slate-400"}`}>
-                    {isOnline ? "Online" : "Offline"}
+                  <Text
+                    className={`text-xs font-semibold ${isOnline ? 'text-green-500' : 'text-slate-400'}`}
+                  >
+                    {isOnline ? 'Online' : 'Offline'}
                   </Text>
                 </View>
               </TouchableOpacity>

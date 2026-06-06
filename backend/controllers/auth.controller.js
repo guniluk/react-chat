@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
 import generateTokenAndSetCookie from '../lib/generateToken.js';
+import { io } from '../socket/socket.js';
 
 export const signup = async (req, res) => {
   try {
@@ -45,6 +46,17 @@ export const signup = async (req, res) => {
       // Generate JWT token and set cookie
       const token = generateTokenAndSetCookie(newUser._id, res);
       await newUser.save();
+
+      // Emit socket event to notify other online users about the new signup
+      io.emit('newUser', {
+        _id: newUser._id,
+        fullName: newUser.fullName,
+        username: newUser.username,
+        profilePic: newUser.profilePic,
+        gender: newUser.gender,
+        unreadCount: 0,
+        lastMessageStatus: 'none',
+      });
 
       res.status(201).json({
         _id: newUser._id,

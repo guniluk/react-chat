@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useLogin } from "../../hooks/useLogin";
+import { Link } from 'react-router-dom';
+import { useLogin } from '../../hooks/useLogin';
 
 export const Login = () => {
   const { formData, setFormData, loading, error, handleLogin } = useLogin();
@@ -8,7 +8,7 @@ export const Login = () => {
     <div className="flex flex-col items-center justify-center p-6 border border-slate-200 dark:border-slate-700/50 rounded-lg bg-white dark:bg-slate-900/80 text-black dark:text-white w-md shadow-xl dark:shadow-2xl transition-colors duration-300">
       <div className="flex mb-6 gap-2 items-center justify-center">
         <h1 className="text-4xl font-bold text-black dark:text-white mb-4">
-          Login{" "}
+          Login{' '}
           <span className="text-blue-600 dark:text-blue-400">Chat App</span>
         </h1>
       </div>
@@ -53,12 +53,12 @@ export const Login = () => {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
       <div className="flex mt-4">
         <p className="text-slate-600 dark:text-slate-400 ">
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <Link
             to="/signup"
             className="text-blue-600 dark:text-blue-400 font-semibold hover:underline cursor-pointer"

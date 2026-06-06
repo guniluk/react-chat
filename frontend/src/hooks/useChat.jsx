@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import { useAuthStore } from "../store/useAuthStore";
-import { useConversationStore } from "../store/useConversationStore";
-import toast from "react-hot-toast";
+import { useEffect, useState, useRef } from 'react';
+import { useAuthStore } from '../store/useAuthStore';
+import { useConversationStore } from '../store/useConversationStore';
+import toast from 'react-hot-toast';
 
 // 전역 AudioContext 싱글톤 (매번 생성하여 브라우저 리소스 부족으로 소리가 안 나는 현상 및 메모리 누수 방지)
 let audioCtx = null;
@@ -14,20 +14,20 @@ const initAudioContext = () => {
       audioCtx = new AudioContextClass();
     }
   }
-  if (audioCtx && audioCtx.state === "suspended") {
+  if (audioCtx && audioCtx.state === 'suspended') {
     audioCtx.resume();
   }
 };
 
 // 최초 사용자 인터랙션(클릭, 키보드 입력) 감지 시 오디오 컨텍스트 락 해제
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   const unlockAudio = () => {
     initAudioContext();
-    window.removeEventListener("click", unlockAudio);
-    window.removeEventListener("keydown", unlockAudio);
+    window.removeEventListener('click', unlockAudio);
+    window.removeEventListener('keydown', unlockAudio);
   };
-  window.addEventListener("click", unlockAudio);
-  window.addEventListener("keydown", unlockAudio);
+  window.addEventListener('click', unlockAudio);
+  window.addEventListener('keydown', unlockAudio);
 }
 
 // 알림음 재생 함수 (Web Audio API를 활용하여 오프라인 및 외부 차단 상태에서도 동작)
@@ -41,7 +41,7 @@ const playNotificationSound = () => {
     // 첫 번째 음 (D5)
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
-    osc1.type = "sine";
+    osc1.type = 'sine';
     osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
     gain1.gain.setValueAtTime(0, ctx.currentTime);
     gain1.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.02);
@@ -52,10 +52,10 @@ const playNotificationSound = () => {
     // 두 번째 음 (A5, 0.08초 딜레이)
     const osc2 = ctx.createOscillator();
     const gain2 = ctx.createGain();
-    osc2.type = "sine";
-    osc2.frequency.setValueAtTime(880.00, ctx.currentTime + 0.08);
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(880.0, ctx.currentTime + 0.08);
     gain2.gain.setValueAtTime(0, ctx.currentTime + 0.08);
-    gain2.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.10);
+    gain2.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.1);
     gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
     osc2.connect(gain2);
     gain2.connect(ctx.destination);
@@ -66,14 +66,13 @@ const playNotificationSound = () => {
     osc2.start(ctx.currentTime + 0.08);
     osc2.stop(ctx.currentTime + 0.28);
   } catch (e) {
-    console.error("Audio play failed", e);
+    console.error('Audio play failed', e);
   }
 };
 
-
 export const useChat = () => {
   const [users, setUsers] = useState([]);
-  const [messageText, setMessageText] = useState("");
+  const [messageText, setMessageText] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -90,7 +89,7 @@ export const useChat = () => {
 
   // 자동 스크롤
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   // 유저 목록 가져오기
@@ -98,12 +97,12 @@ export const useChat = () => {
     const getUsers = async () => {
       setLoadingUsers(true);
       try {
-        const res = await fetch("/api/users");
+        const res = await fetch('/api/users');
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         setUsers(data);
       } catch (err) {
-        console.error("Failed to load users:", err.message);
+        console.error('Failed to load users:', err.message);
       } finally {
         setLoadingUsers(false);
       }
@@ -123,15 +122,13 @@ export const useChat = () => {
         setMessages(data);
 
         // 대화방을 열었으므로 해당 유저의 unreadCount를 0으로 리셋
-        setUsers(prevUsers =>
-          prevUsers.map(u =>
-            u._id === selectedConversation._id
-              ? { ...u, unreadCount: 0 }
-              : u
-          )
+        setUsers((prevUsers) =>
+          prevUsers.map((u) =>
+            u._id === selectedConversation._id ? { ...u, unreadCount: 0 } : u,
+          ),
         );
       } catch (err) {
-        console.error("Failed to load messages:", err.message);
+        console.error('Failed to load messages:', err.message);
       } finally {
         setLoadingMessages(false);
       }
@@ -148,11 +145,11 @@ export const useChat = () => {
       const res = await fetch(
         `/api/messages/send/${selectedConversation._id}`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             message: messageText,
-            messageFile: selectedImage
+            messageFile: selectedImage,
           }),
         },
       );
@@ -165,19 +162,19 @@ export const useChat = () => {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setMessages([...messages, data]);
-      setMessageText("");
+      setMessageText('');
       setSelectedImage(null);
 
       // 내가 보낸 메시지 상태를 우선 'unread'로 표시
-      setUsers(prevUsers =>
-        prevUsers.map(u =>
+      setUsers((prevUsers) =>
+        prevUsers.map((u) =>
           u._id === selectedConversation._id
             ? { ...u, lastMessageStatus: 'unread' }
-            : u
-        )
+            : u,
+        ),
       );
     } catch (err) {
-      console.error("Failed to send message:", err.message);
+      console.error('Failed to send message:', err.message);
     }
   };
 
@@ -192,23 +189,24 @@ export const useChat = () => {
         playNotificationSound();
 
         // 즉시 서버에 읽음 처리 API 전송
-        fetch(`/api/messages/read/${selectedConversation._id}`, { method: "PUT" })
-          .catch(err => console.error("Failed to mark read:", err));
+        fetch(`/api/messages/read/${selectedConversation._id}`, {
+          method: 'PUT',
+        }).catch((err) => console.error('Failed to mark read:', err));
       } else {
         // 2. 다른 유저가 보낸 메시지인 경우 -> 유저 목록의 unreadCount 1 증가
-        setUsers(prevUsers =>
-          prevUsers.map(u =>
+        setUsers((prevUsers) =>
+          prevUsers.map((u) =>
             u._id === newMessage.senderId
               ? { ...u, unreadCount: (u.unreadCount || 0) + 1 }
-              : u
-          )
+              : u,
+          ),
         );
 
         const sender = users.find((u) => u._id === newMessage.senderId);
-        const senderName = sender ? sender.fullName : "새로운 메시지";
+        const senderName = sender ? sender.fullName : '새로운 메시지';
         const senderPic =
           sender?.profilePic ||
-          `https://api.dicebear.com/9.x/avataaars/svg?seed=${sender?.username || "default"}`;
+          `https://api.dicebear.com/9.x/avataaars/svg?seed=${sender?.username || 'default'}`;
 
         // 알림음 재생 (Web Audio API)
         playNotificationSound();
@@ -223,7 +221,7 @@ export const useChat = () => {
                 toast.dismiss(t.id);
               }}
               className={`${
-                t.visible ? "animate-bounce-in" : "animate-fade-out"
+                t.visible ? 'animate-bounce-in' : 'animate-fade-out'
               } max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl pointer-events-auto flex ring-1 ring-black ring-opacity-5 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
             >
               <div className="flex-1 w-0 p-4">
@@ -241,7 +239,7 @@ export const useChat = () => {
                       {senderName}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate font-medium">
-                      {newMessage.message || "📷 사진"}
+                      {newMessage.message || '📷 사진'}
                     </p>
                   </div>
                 </div>
@@ -267,32 +265,39 @@ export const useChat = () => {
     // 상대방이 메시지를 읽었을 때의 실시간 처리
     const handleMessagesRead = ({ readerId }) => {
       // 유저 목록의 lastMessageStatus를 'read'로 업데이트
-      setUsers(prevUsers =>
-        prevUsers.map(u =>
-          u._id === readerId
-            ? { ...u, lastMessageStatus: 'read' }
-            : u
-        )
+      setUsers((prevUsers) =>
+        prevUsers.map((u) =>
+          u._id === readerId ? { ...u, lastMessageStatus: 'read' } : u,
+        ),
       );
 
       // 현재 대화방이 해당 유저와의 방이라면, 화면상의 내 메시지들도 읽음으로 업데이트
       if (selectedConversation?._id === readerId) {
         setMessages(
-          messages.map(msg =>
-            msg.receiverId === readerId
-              ? { ...msg, isRead: true }
-              : msg
-          )
+          messages.map((msg) =>
+            msg.receiverId === readerId ? { ...msg, isRead: true } : msg,
+          ),
         );
       }
     };
 
-    socket.on("newMessage", handleNewMessage);
-    socket.on("messagesRead", handleMessagesRead);
+    const handleNewUser = (newUser) => {
+      if (newUser._id !== authUser?._id) {
+        setUsers((prevUsers) => {
+          if (prevUsers.some((u) => u._id === newUser._id)) return prevUsers;
+          return [...prevUsers, newUser];
+        });
+      }
+    };
+
+    socket.on('newMessage', handleNewMessage);
+    socket.on('messagesRead', handleMessagesRead);
+    socket.on('newUser', handleNewUser);
 
     return () => {
-      socket.off("newMessage", handleNewMessage);
-      socket.off("messagesRead", handleMessagesRead);
+      socket.off('newMessage', handleNewMessage);
+      socket.off('messagesRead', handleMessagesRead);
+      socket.off('newUser', handleNewUser);
     };
   }, [
     socket,
@@ -306,16 +311,16 @@ export const useChat = () => {
   // 로그아웃
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setAuthUser(null);
       setSelectedConversation(null);
     } catch (err) {
-      console.error("Failed to logout:", err.message);
+      console.error('Failed to logout:', err.message);
     }
   };
 

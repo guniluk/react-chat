@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,22 +10,32 @@ import {
   Platform,
   Animated,
   Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { useAuthStore } from "../store/useAuthStore";
-import { useConversationStore, MessageType } from "../store/useConversationStore";
-import { BASE_URL } from "../config";
-import { Feather } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import { useAuthStore } from '../store/useAuthStore';
+import {
+  useConversationStore,
+  MessageType,
+} from '../store/useConversationStore';
+import { BASE_URL } from '../config';
+import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function Chat() {
   const router = useRouter();
   const { authUser, token, socket, onlineUsers } = useAuthStore();
-  const { selectedConversation, setSelectedConversation, messages, setMessages, users, setUsers } = useConversationStore();
+  const {
+    selectedConversation,
+    setSelectedConversation,
+    messages,
+    setMessages,
+    users,
+    setUsers,
+  } = useConversationStore();
 
-  const [messageText, setMessageText] = useState("");
+  const [messageText, setMessageText] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList<MessageType>>(null);
@@ -33,7 +43,7 @@ export default function Chat() {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert("알림", "사진 라이브러리 접근 권한이 필요합니다.");
+      Alert.alert('알림', '사진 라이브러리 접근 권한이 필요합니다.');
       return;
     }
 
@@ -48,14 +58,14 @@ export default function Chat() {
       const asset = result.assets[0];
 
       if (asset.fileSize && asset.fileSize > 1024 * 1024) {
-        Alert.alert("알림", "이미지 크기는 1MB를 초과할 수 없습니다.");
+        Alert.alert('알림', '이미지 크기는 1MB를 초과할 수 없습니다.');
         return;
       }
 
       if (!asset.fileSize && asset.base64) {
         const approxSize = asset.base64.length * 0.75;
         if (approxSize > 1024 * 1024) {
-          Alert.alert("알림", "이미지 크기는 1MB를 초과할 수 없습니다.");
+          Alert.alert('알림', '이미지 크기는 1MB를 초과할 수 없습니다.');
           return;
         }
       }
@@ -78,7 +88,10 @@ export default function Chat() {
   useEffect(() => {
     return () => {
       // 이탈할 때, 전역 대화 상대방이 본 컴포넌트의 대화 상대와 여전히 동일한 경우에만 초기화
-      if (useConversationStore.getState().selectedConversation?._id === currentChatUserRef.current?._id) {
+      if (
+        useConversationStore.getState().selectedConversation?._id ===
+        currentChatUserRef.current?._id
+      ) {
         setSelectedConversation(null);
       }
     };
@@ -91,9 +104,9 @@ export default function Chat() {
 
   // DiceBear SVG 주소를 PNG 주소로 우회 변환하여 React Native 렌더링 먹통 방지
   const getProfilePicUrl = (url: string) => {
-    if (!url) return "";
-    if (url.includes("dicebear.com") && url.includes("/svg")) {
-      return url.replace("/svg", "/png");
+    if (!url) return '';
+    if (url.includes('dicebear.com') && url.includes('/svg')) {
+      return url.replace('/svg', '/png');
     }
     return url;
   };
@@ -105,11 +118,14 @@ export default function Chat() {
     const getMessages = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${BASE_URL}/api/messages/${selectedConversation._id}`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
+        const res = await fetch(
+          `${BASE_URL}/api/messages/${selectedConversation._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         setMessages(data);
@@ -117,13 +133,11 @@ export default function Chat() {
         // 대화방을 열었으므로 해당 유저의 unreadCount를 0으로 리셋
         setUsers(
           users.map((u) =>
-            u._id === selectedConversation._id
-              ? { ...u, unreadCount: 0 }
-              : u
-          )
+            u._id === selectedConversation._id ? { ...u, unreadCount: 0 } : u,
+          ),
         );
       } catch (err: any) {
-        console.error("Failed to load messages:", err.message);
+        console.error('Failed to load messages:', err.message);
       } finally {
         setLoading(false);
       }
@@ -144,11 +158,11 @@ export default function Chat() {
 
         // 즉시 읽음 처리 API 호출
         fetch(`${BASE_URL}/api/messages/read/${selectedConversation._id}`, {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
-        }).catch((err) => console.error("Failed to mark read:", err));
+        }).catch((err) => console.error('Failed to mark read:', err));
       }
     };
 
@@ -157,10 +171,8 @@ export default function Chat() {
       const currentUsers = useConversationStore.getState().users;
       setUsers(
         currentUsers.map((u) =>
-          u._id === readerId
-            ? { ...u, lastMessageStatus: "read" }
-            : u
-        )
+          u._id === readerId ? { ...u, lastMessageStatus: 'read' } : u,
+        ),
       );
 
       // 현재 열려 있는 방이 해당 상대의 방이면, 내 말풍선 메시지들도 읽음 처리
@@ -168,44 +180,50 @@ export default function Chat() {
         const currentMessages = useConversationStore.getState().messages;
         setMessages(
           currentMessages.map((msg) =>
-            msg.receiverId === readerId
-              ? { ...msg, isRead: true }
-              : msg
-          )
+            msg.receiverId === readerId ? { ...msg, isRead: true } : msg,
+          ),
         );
       }
     };
 
-    socket.on("newMessage", handleNewMessage);
-    socket.on("messagesRead", handleMessagesRead);
+    socket.on('newMessage', handleNewMessage);
+    socket.on('messagesRead', handleMessagesRead);
 
     return () => {
-      socket.off("newMessage", handleNewMessage);
-      socket.off("messagesRead", handleMessagesRead);
+      socket.off('newMessage', handleNewMessage);
+      socket.off('messagesRead', handleMessagesRead);
     };
   }, [socket, selectedConversation?._id, setMessages, setUsers, token]);
 
   // 메시지 전송
   const handleSendMessage = async () => {
-    if ((!messageText.trim() && !selectedImage) || !selectedConversation?._id || !token) return;
+    if (
+      (!messageText.trim() && !selectedImage) ||
+      !selectedConversation?._id ||
+      !token
+    )
+      return;
 
     const textToSend = messageText;
     const imageToSend = selectedImage;
-    setMessageText("");
+    setMessageText('');
     setSelectedImage(null);
 
     try {
-      const res = await fetch(`${BASE_URL}/api/messages/send/${selectedConversation._id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+      const res = await fetch(
+        `${BASE_URL}/api/messages/send/${selectedConversation._id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            message: textToSend,
+            messageFile: imageToSend,
+          }),
         },
-        body: JSON.stringify({ 
-          message: textToSend,
-          messageFile: imageToSend
-        }),
-      });
+      );
 
       if (!res.ok) {
         const errText = await res.text();
@@ -220,12 +238,12 @@ export default function Chat() {
       setUsers(
         users.map((u) =>
           u._id === selectedConversation._id
-            ? { ...u, lastMessageStatus: "unread" }
-            : u
-        )
+            ? { ...u, lastMessageStatus: 'unread' }
+            : u,
+        ),
       );
     } catch (err: any) {
-      console.error("Failed to send message:", err.message);
+      console.error('Failed to send message:', err.message);
     }
   };
 
@@ -277,7 +295,7 @@ export default function Chat() {
               useNativeDriver: true,
             }),
           ]),
-          { iterations: 10 }
+          { iterations: 10 },
         );
 
         shakeSequence.start();
@@ -308,19 +326,22 @@ export default function Chat() {
   const isOnline = onlineUsers?.includes(selectedConversation._id);
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-slate-950" edges={["top", "bottom"]}>
+    <SafeAreaView
+      className="flex-1 bg-white dark:bg-slate-950"
+      edges={['top', 'bottom']}
+    >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         {/* 상단 헤더 */}
         <View className="px-4 py-3 flex-row items-center border-b border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-900/50">
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => {
               router.back();
-            }} 
-            className="mr-3 p-1.5 rounded-full active:bg-slate-100 dark:active:bg-slate-800" 
+            }}
+            className="mr-3 p-1.5 rounded-full active:bg-slate-100 dark:active:bg-slate-800"
             aria-label="Go back"
           >
             <Feather name="arrow-left" size={20} color="#3b82f6" />
@@ -330,7 +351,7 @@ export default function Chat() {
             <Image
               source={getProfilePicUrl(
                 selectedConversation.profilePic ||
-                `https://api.dicebear.com/9.x/avataaars/svg?seed=${selectedConversation.username}`
+                  `https://api.dicebear.com/9.x/avataaars/svg?seed=${selectedConversation.username}`,
               )}
               style={{ width: 36, height: 36, borderRadius: 18 }}
               contentFit="cover"
@@ -345,14 +366,19 @@ export default function Chat() {
             <Text className="text-slate-900 dark:text-white font-bold text-base leading-tight">
               {selectedConversation.fullName}
             </Text>
-            <Text className={`text-[10px] ${isOnline ? "text-green-500" : "text-slate-400"}`}>
-              {isOnline ? "Online" : "Offline"}
+            <Text
+              className={`text-[10px] ${isOnline ? 'text-green-500' : 'text-slate-400'}`}
+            >
+              {isOnline ? 'Online' : 'Offline'}
             </Text>
           </View>
         </View>
 
         {/* 대화 내용 영역 */}
-        <View style={{ flex: 1 }} className="bg-slate-50/30 dark:bg-slate-950/20 px-4 py-2">
+        <View
+          style={{ flex: 1 }}
+          className="bg-slate-50/30 dark:bg-slate-950/20 px-4 py-2"
+        >
           {loading ? (
             <View className="flex-1 justify-center items-center">
               <ActivityIndicator size="large" color="#3b82f6" />
@@ -371,24 +397,29 @@ export default function Chat() {
               showsVerticalScrollIndicator={false}
               style={{ flex: 1 }}
               contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
-              onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+              onContentSizeChange={() =>
+                flatListRef.current?.scrollToEnd({ animated: true })
+              }
               renderItem={({ item }) => {
                 const isMyMessage = item.senderId === authUser?._id;
-                const messageTime = new Date(item.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                });
+                const messageTime = new Date(item.createdAt).toLocaleTimeString(
+                  [],
+                  {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  },
+                );
                 return (
                   <View
                     className={`flex-row my-1.5 ${
-                      isMyMessage ? "justify-end" : "justify-start"
+                      isMyMessage ? 'justify-end' : 'justify-start'
                     }`}
                   >
                     {!isMyMessage && (
                       <Image
                         source={getProfilePicUrl(
                           selectedConversation.profilePic ||
-                          `https://api.dicebear.com/9.x/avataaars/svg?seed=${selectedConversation.username}`
+                            `https://api.dicebear.com/9.x/avataaars/svg?seed=${selectedConversation.username}`,
                         )}
                         style={{ width: 28, height: 28, borderRadius: 14 }}
                         className="mr-2 self-end mb-1"
@@ -404,26 +435,33 @@ export default function Chat() {
                         }
                         className={`px-4 py-2.5 rounded-2xl ${
                           isMyMessage
-                            ? "bg-blue-600 rounded-br-none"
-                            : "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-none"
+                            ? 'bg-blue-600 rounded-br-none'
+                            : 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-none'
                         }`}
                       >
                         {item.messageFile ? (
                           <Image
                             source={{ uri: item.messageFile }}
-                            style={{ width: 200, height: 150, borderRadius: 8, marginBottom: item.message ? 6 : 0 }}
+                            style={{
+                              width: 200,
+                              height: 150,
+                              borderRadius: 8,
+                              marginBottom: item.message ? 6 : 0,
+                            }}
                             contentFit="cover"
                           />
                         ) : null}
                         {item.message ? (
-                          <Text className={`text-sm leading-5 ${isMyMessage ? "text-white" : "text-slate-900 dark:text-white"}`}>
+                          <Text
+                            className={`text-sm leading-5 ${isMyMessage ? 'text-white' : 'text-slate-900 dark:text-white'}`}
+                          >
                             {item.message}
                           </Text>
                         ) : null}
                       </Animated.View>
                       <Text
                         className={`text-[9px] text-slate-500 mt-1 ${
-                          isMyMessage ? "text-right" : "text-left"
+                          isMyMessage ? 'text-right' : 'text-left'
                         }`}
                       >
                         {messageTime}
@@ -433,7 +471,7 @@ export default function Chat() {
                       <Image
                         source={getProfilePicUrl(
                           authUser?.profilePic ||
-                          `https://api.dicebear.com/9.x/avataaars/svg?seed=${authUser?.username}`
+                            `https://api.dicebear.com/9.x/avataaars/svg?seed=${authUser?.username}`,
                         )}
                         style={{ width: 28, height: 28, borderRadius: 14 }}
                         className="ml-2 self-end mb-1"
@@ -468,10 +506,14 @@ export default function Chat() {
             <TouchableOpacity
               onPress={pickImage}
               className={`mr-3 p-2.5 rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 active:bg-slate-100 ${
-                selectedImage ? "border-blue-500" : ""
+                selectedImage ? 'border-blue-500' : ''
               }`}
             >
-              <Feather name="image" size={18} color={selectedImage ? "#3b82f6" : "#64748b"} />
+              <Feather
+                name="image"
+                size={18}
+                color={selectedImage ? '#3b82f6' : '#64748b'}
+              />
             </TouchableOpacity>
 
             <TextInput

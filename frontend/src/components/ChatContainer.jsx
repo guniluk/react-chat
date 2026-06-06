@@ -1,6 +1,12 @@
-import { useState, useEffect, useRef } from "react";
-import { FiMessageSquare, FiSend, FiArrowLeft, FiImage, FiX } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { useState, useEffect, useRef } from 'react';
+import {
+  FiMessageSquare,
+  FiSend,
+  FiArrowLeft,
+  FiImage,
+  FiX,
+} from 'react-icons/fi';
+import toast from 'react-hot-toast';
 
 const ChatContainer = ({
   selectedConversation,
@@ -26,8 +32,8 @@ const ChatContainer = ({
     if (!file) return;
 
     if (file.size > 1024 * 1024) {
-      toast.error("이미지 크기는 1MB를 초과할 수 없습니다.");
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      toast.error('이미지 크기는 1MB를 초과할 수 없습니다.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
@@ -40,7 +46,7 @@ const ChatContainer = ({
 
   const removeImage = () => {
     setSelectedImage(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   useEffect(() => {
@@ -59,7 +65,10 @@ const ChatContainer = ({
       const lastMessage = messages[messages.length - 1];
       // 마지막 메시지가 상대방이 보낸 메시지(수신 메시지)일 때만 shake 적용
       if (lastMessage && lastMessage.senderId !== authUser?._id) {
-        setShakingMessageId(lastMessage._id);
+        const setShake = () => {
+          setShakingMessageId(lastMessage._id);
+        };
+        setShake();
         const timer = setTimeout(() => setShakingMessageId(null), 2000);
         prevLength.current = messages.length;
         return () => clearTimeout(timer);
@@ -96,8 +105,8 @@ const ChatContainer = ({
             <span
               className={`absolute bottom-0 right-0 block w-2.5 h-2.5 rounded-full border border-white dark:border-slate-900 ${
                 onlineUsers?.includes(selectedConversation._id)
-                  ? "bg-green-500 animate-pulse"
-                  : "bg-slate-400"
+                  ? 'bg-green-500 animate-pulse'
+                  : 'bg-slate-400'
               }`}
             />
           </div>
@@ -121,22 +130,20 @@ const ChatContainer = ({
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-600 dark:text-slate-500">
             <FiMessageSquare className="w-12 h-12 mb-2 text-slate-400 dark:text-slate-600 animate-pulse" />
-            <p className="text-sm">
-              Say hello to start the conversation!
-            </p>
+            <p className="text-sm">Say hello to start the conversation!</p>
           </div>
         ) : (
           messages.map((msg) => {
             const isMyMessage = msg.senderId === authUser?._id;
             const messageTime = new Date(msg.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
+              hour: '2-digit',
+              minute: '2-digit',
             });
             return (
               <div
                 key={msg._id}
                 className={`flex gap-3 max-w-[75%] ${
-                  isMyMessage ? "ml-auto flex-row-reverse" : "mr-auto"
+                  isMyMessage ? 'ml-auto flex-row-reverse' : 'mr-auto'
                 }`}
               >
                 {/* 유저 이미지 */}
@@ -156,22 +163,22 @@ const ChatContainer = ({
                   <div
                     className={`px-4 py-2.5 rounded-2xl text-sm shadow-md font-medium break-all whitespace-pre-wrap ${
                       isMyMessage
-                        ? "bg-blue-600 text-white rounded-br-none"
-                        : "bg-slate-200 dark:bg-slate-700 text-black dark:text-slate-100 rounded-bl-none"
-                    } ${msg._id === shakingMessageId ? "animate-shake" : ""}`}
+                        ? 'bg-blue-600 text-white rounded-br-none'
+                        : 'bg-slate-200 dark:bg-slate-700 text-black dark:text-slate-100 rounded-bl-none'
+                    } ${msg._id === shakingMessageId ? 'animate-shake' : ''}`}
                   >
                     {msg.messageFile && (
                       <img
                         src={msg.messageFile}
                         alt="Attachment"
-                        className="max-w-[250px] md:max-w-[320px] rounded-lg mb-2 shadow-sm border border-slate-200 dark:border-slate-700/50"
+                        className="max-w-62.5 md:max-w-[320px] rounded-lg mb-2 shadow-sm border border-slate-200 dark:border-slate-700/50"
                       />
                     )}
                     {msg.message && <p>{msg.message}</p>}
                   </div>
                   <span
                     className={`text-[10px] text-slate-700 dark:text-slate-500 mt-1 ${
-                      isMyMessage ? "text-right" : "text-left"
+                      isMyMessage ? 'text-right' : 'text-left'
                     }`}
                   >
                     {messageTime}
@@ -211,11 +218,11 @@ const ChatContainer = ({
             ref={fileInputRef}
             onChange={handleImageChange}
           />
-          
+
           <button
             type="button"
             className={`flex items-center justify-center p-3 text-slate-500 dark:text-slate-400 transition-colors bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700/50 cursor-pointer rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 ${
-              selectedImage ? "text-blue-500 border-blue-500" : ""
+              selectedImage ? 'text-blue-500 border-blue-500' : ''
             }`}
             onClick={() => fileInputRef.current?.click()}
           >

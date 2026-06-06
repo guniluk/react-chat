@@ -1,18 +1,26 @@
-import "../global.css";
-import { Stack, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { View, Text, Animated, TouchableOpacity } from "react-native";
-import { Image } from "expo-image";
-import { useAuthStore } from "../store/useAuthStore";
-import { useConversationStore, MessageType, UserType } from "../store/useConversationStore";
-import { Feather } from "@expo/vector-icons";
+import '../global.css';
+import { Stack, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { View, Text, Animated, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
+import { useAuthStore } from '../store/useAuthStore';
+import {
+  useConversationStore,
+  MessageType,
+  UserType,
+} from '../store/useConversationStore';
+import { Feather } from '@expo/vector-icons';
 
 export default function RootLayout() {
   const { authUser, connectSocket, disconnectSocket, socket } = useAuthStore();
-  const { setUsers, selectedConversation, setSelectedConversation } = useConversationStore();
+  const { setUsers, selectedConversation, setSelectedConversation } =
+    useConversationStore();
   const router = useRouter();
 
-  const [notification, setNotification] = useState<{ message: string; sender: UserType } | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    sender: UserType;
+  } | null>(null);
   const [slideAnim] = useState(() => new Animated.Value(-150));
 
   useEffect(() => {
@@ -36,15 +44,17 @@ export default function RootLayout() {
         currentUsers.map((u) =>
           u._id === newMessage.senderId
             ? { ...u, unreadCount: (u.unreadCount || 0) + 1 }
-            : u
-        )
+            : u,
+        ),
       );
 
       // Find sender info from latest users state
-      const sender = useConversationStore.getState().users.find((u) => u._id === newMessage.senderId);
+      const sender = useConversationStore
+        .getState()
+        .users.find((u) => u._id === newMessage.senderId);
       if (sender) {
-        setNotification({ message: newMessage.message || "📷 사진", sender });
-        
+        setNotification({ message: newMessage.message || '📷 사진', sender });
+
         // Show toast
         Animated.timing(slideAnim, {
           toValue: 50,
@@ -58,20 +68,29 @@ export default function RootLayout() {
       const currentUsers = useConversationStore.getState().users;
       setUsers(
         currentUsers.map((u) =>
-          u._id === readerId
-            ? { ...u, lastMessageStatus: "read" }
-            : u
-        )
+          u._id === readerId ? { ...u, lastMessageStatus: 'read' } : u,
+        ),
       );
     };
 
-    socket.on("newMessage", handleNewMessage);
-    socket.on("messagesRead", handleMessagesRead);
-    return () => {
-      socket.off("newMessage", handleNewMessage);
-      socket.off("messagesRead", handleMessagesRead);
+    const handleNewUser = (newUser: UserType) => {
+      if (newUser._id !== authUser?._id) {
+        const currentUsers = useConversationStore.getState().users;
+        if (!currentUsers.some((u) => u._id === newUser._id)) {
+          setUsers([...currentUsers, newUser]);
+        }
+      }
     };
-  }, [socket, selectedConversation, slideAnim, setUsers]);
+
+    socket.on('newMessage', handleNewMessage);
+    socket.on('messagesRead', handleMessagesRead);
+    socket.on('newUser', handleNewUser);
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+      socket.off('messagesRead', handleMessagesRead);
+      socket.off('newUser', handleNewUser);
+    };
+  }, [socket, selectedConversation, slideAnim, setUsers, authUser?._id]);
 
   const handleNotificationPress = () => {
     if (notification?.sender) {
@@ -88,7 +107,7 @@ export default function RootLayout() {
       }
 
       setSelectedConversation(notification.sender);
-      router.push("/chat");
+      router.push('/chat');
     }
   };
 
@@ -101,9 +120,9 @@ export default function RootLayout() {
   };
 
   const getProfilePicUrl = (url: string) => {
-    if (!url) return "";
-    if (url.includes("dicebear.com") && url.includes("/svg")) {
-      return url.replace("/svg", "/png");
+    if (!url) return '';
+    if (url.includes('dicebear.com') && url.includes('/svg')) {
+      return url.replace('/svg', '/png');
     }
     return url;
   };
@@ -115,7 +134,7 @@ export default function RootLayout() {
       {/* Global Notification Toast */}
       <Animated.View
         style={{
-          position: "absolute",
+          position: 'absolute',
           top: 0,
           left: 16,
           right: 16,
@@ -134,7 +153,7 @@ export default function RootLayout() {
               <Image
                 source={getProfilePicUrl(
                   notification.sender.profilePic ||
-                    `https://api.dicebear.com/9.x/avataaars/svg?seed=${notification.sender.username}`
+                    `https://api.dicebear.com/9.x/avataaars/svg?seed=${notification.sender.username}`,
                 )}
                 style={{ width: 44, height: 44, borderRadius: 22 }}
                 contentFit="cover"
@@ -143,14 +162,17 @@ export default function RootLayout() {
                 <Text className="text-slate-900 dark:text-white font-bold text-base">
                   {notification.sender.fullName}
                 </Text>
-                <Text className="text-slate-500 dark:text-slate-300 text-sm mt-0.5" numberOfLines={1}>
+                <Text
+                  className="text-slate-500 dark:text-slate-300 text-sm mt-0.5"
+                  numberOfLines={1}
+                >
                   {notification.message}
                 </Text>
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              onPress={handleDismiss} 
+            <TouchableOpacity
+              onPress={handleDismiss}
               className="w-8 h-8 items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-full"
               aria-label="Dismiss notification"
             >

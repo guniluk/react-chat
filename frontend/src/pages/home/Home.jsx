@@ -1,8 +1,8 @@
-import { useChat } from "../../hooks/useChat";
+import { useChat } from '../../hooks/useChat';
 
-import Sidebar from "../../components/Sidebar";
-import ChatContainer from "../../components/ChatContainer";
-import NoChatSelected from "../../components/NoChatSelected";
+import Sidebar from '../../components/Sidebar';
+import ChatContainer from '../../components/ChatContainer';
+import NoChatSelected from '../../components/NoChatSelected';
 
 const Home = () => {
   const {

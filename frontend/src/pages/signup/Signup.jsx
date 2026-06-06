@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useSignup } from "../../hooks/useSignup";
+import { Link } from 'react-router-dom';
+import { useSignup } from '../../hooks/useSignup';
 
 export const Signup = () => {
   const { formData, setFormData, loading, error, handleSignup } = useSignup();
@@ -7,7 +7,7 @@ export const Signup = () => {
   return (
     <div className="flex flex-col items-center justify-center p-6 mx-auto text-black transition-colors duration-300 bg-white border rounded-lg shadow-xl border-slate-200 dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-white w-md dark:shadow-2xl">
       <h1 className="mb-4 text-4xl font-bold text-black dark:text-white">
-        Sign Up{" "}
+        Sign Up{' '}
         <span className="text-blue-600 dark:text-blue-400">Chat App</span>
       </h1>
       {error && (
@@ -64,7 +64,7 @@ export const Signup = () => {
             id="male"
             value="male"
             className="w-4 h-4 mr-1 cursor-pointer"
-            checked={formData.gender === "male"}
+            checked={formData.gender === 'male'}
             onChange={(e) =>
               setFormData({ ...formData, gender: e.target.value })
             }
@@ -76,7 +76,7 @@ export const Signup = () => {
             id="female"
             value="female"
             className="w-4 h-4 mr-1 cursor-pointer"
-            checked={formData.gender === "female"}
+            checked={formData.gender === 'female'}
             onChange={(e) =>
               setFormData({ ...formData, gender: e.target.value })
             }
@@ -88,7 +88,7 @@ export const Signup = () => {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Signing up..." : "Sign Up"}
+          {loading ? 'Signing up...' : 'Sign Up'}
         </button>
       </form>
 

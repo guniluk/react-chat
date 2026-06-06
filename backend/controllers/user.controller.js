@@ -38,7 +38,7 @@ export const getUsersForSidebar = async (req, res) => {
           unreadCount,
           lastMessageStatus,
         };
-      })
+      }),
     );
 
     res.status(200).json(usersWithStatus);

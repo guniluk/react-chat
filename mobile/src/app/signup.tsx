@@ -98,6 +98,7 @@ export default function Signup() {
                 placeholder="Enter your full name"
                 placeholderTextColor="#64748b"
                 value={formData.fullName}
+                autoCapitalize="none"
                 onChangeText={(text) =>
                   setFormData({ ...formData, fullName: text })
                 }

@@ -14,7 +14,7 @@ const messageSchema = new mongoose.Schema(
     },
     message: {
       type: String,
-      required: true,
+      default: "",
     },
     // cloudinary message file
     messageFile: {
